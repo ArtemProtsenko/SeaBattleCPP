@@ -49,6 +49,11 @@ bool enteredCorrectType(string playerType)
     return  true;
 }
 
+bool cantPlaceBlock(char field[width][height], int x, int y)
+{
+    return field[x][y] != 'Y';
+}
+
 int wayToPlaceShip(int coordX, int coordY, char field[width][height], int length, int &axis)
 {
     axis = rand() % 2;
@@ -57,7 +62,7 @@ int wayToPlaceShip(int coordX, int coordY, char field[width][height], int length
     {
         for(int i = 0; i < length; i++)
         {
-            if(field[coordX + i][coordY] != 'Y')
+            if(cantPlaceBlock(field, coordX + i, coordY) || cantPlaceBlock(field, coordX + i, coordY + 1) || cantPlaceBlock(field, coordX + i, coordY - 1))
             {
                 return 0;
             }
@@ -69,7 +74,7 @@ int wayToPlaceShip(int coordX, int coordY, char field[width][height], int length
     {
         for(int i = 0; i < length; i++)
         {
-            if(field[coordX][coordY + i] != 'Y')
+            if(cantPlaceBlock(field, coordX, coordY + i) || cantPlaceBlock(field, coordX + 1, coordY + i) || cantPlaceBlock(field, coordX - 1, coordY + i))
             {
                 return 0;
             }
