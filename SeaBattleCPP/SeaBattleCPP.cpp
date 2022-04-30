@@ -40,7 +40,7 @@ bool isPerson(string playerType)
     return false;
 }
 
-bool enteredCorrectType(string &playerType)
+bool enteredCorrectType(string playerType)
 {
     if(playerType != "bot" && playerType != "Bot" && playerType != "human" && playerType != "Human")
     {
@@ -57,7 +57,7 @@ int wayToPlaceShip(int coordX, int coordY, char field[width][height], int length
     {
         for(int i = 0; i < length; i++)
         {
-            if(field[coordX + i][coordY] == 'Y')
+            if(field[coordX + i][coordY] != 'Y')
             {
                 return 0;
             }
@@ -69,7 +69,7 @@ int wayToPlaceShip(int coordX, int coordY, char field[width][height], int length
     {
         for(int i = 0; i < length; i++)
         {
-            if(field[coordX][coordY + i] == 'Y')
+            if(field[coordX][coordY + i] != 'Y')
             {
                 return 0;
             }
@@ -163,7 +163,7 @@ void SetPlayerShip(char (&field)[width][height], int length)
         int x = rand() % width;
         int y = rand() % height;
     
-        if(wayToPlaceShip(x, y, field, length, axisForShips) == 1)
+        if(wayToPlaceShip(x, y, field, length, axisForShips) == 1 || wayToPlaceShip(x, y, field, length, axisForShips) == 2)
         {
             placeShip(field, length, x, y, axisForShips);
             break;
@@ -252,6 +252,7 @@ void SetPlayers()
 
 void DrawGameTurn()
 {
+    setPlayersFieldMode();
     DrawField(playerOneField, playerOneMode);
     cout << endl;
     DrawField(playerTwoField, playerTwoMode);
