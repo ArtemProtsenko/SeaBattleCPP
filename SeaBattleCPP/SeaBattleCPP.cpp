@@ -55,9 +55,17 @@ bool cantPlaceBlock(char field[width][height], int x, int y)
     {
         x++;
     }
+    else if (x >= width)
+    {
+        x--;
+    }
     if (y < 0)
     {
         y++;
+    }
+    else if (y >= height)
+    {
+        y--;
     }
     return field[x][y] != 'Y';
 }
