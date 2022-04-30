@@ -22,6 +22,13 @@ int playerOneShootY;
 int playerTwoShootX;
 int playerTwoShootY;
 
+int carrierLength = 4;
+int cruiserLength = 3;
+int battleShipLength = 2;
+int miniShipLength = 1;
+
+int axisForShips;
+
 string cheatCode;
 
 bool isPerson(string playerType)
@@ -33,13 +40,43 @@ bool isPerson(string playerType)
     return false;
 }
 
-bool enteredCorrectType(string playerType)
+bool enteredCorrectType(string &playerType)
 {
     if(playerType != "bot" && playerType != "Bot" && playerType != "human" && playerType != "Human")
     {
         return false;
     }
     return  true;
+}
+
+int wayToPlaceShip(int coordX, int coordY, char field[width][height], int length, int &axis)
+{
+    axis = rand() % 2;
+    
+    if(axis == 1)
+    {
+        for(int i = 0; i < length; i++)
+        {
+            if(field[coordX + i][coordY] == 'Y')
+            {
+                return 0;
+            }
+        }
+        
+        return 1;
+    }
+    else
+    {
+        for(int i = 0; i < length; i++)
+        {
+            if(field[coordX][coordY + i] == 'Y')
+            {
+                return 0;
+            }
+        }
+
+        return 2;
+    }
 }
 
 bool isCheated()
@@ -49,12 +86,13 @@ bool isCheated()
 
 void Instructions()
 {
-    system("clr");
     cout << "This is Sea Battle. there are 2 axis: x & y." << endl;
     cout << "x - horizontal, y - vertical." << endl;
     cout << "Write first coordinate x from 1 to 9, then press enter and write y." << endl;
     cout << "# - you hit ship, ^ - miss." << endl;
     cout << "Good luck!" << endl;;
+    system("pause");
+    system("clr");
 }
 
 void inputPlayerTypes()
@@ -98,40 +136,47 @@ void SetField(char (&field)[width][height])
     {
         for (int j = 0; j < width; j++)
         {
-            if (field[j][i] != '@')
-            {
-                field[j][i] = 'Y';
-            }
+            field[j][i] = 'Y';
         }
     }
 }
 
-void SetPlayerCarrier(char (&field)[width][height])
+void placeShip(char (&field)[width][height], int length, int coordX, int coordY, int axis)
 {
-
+    for(int i = 0; i < length; i++)
+    {
+        if(axis == 1)
+        {
+            field[coordX + i][coordY] = '@';
+        }
+        else
+        {
+            field[coordX][coordY + i] = '@';
+        }
+    }
 }
 
-void SetPlayerCruiser(char (&field)[width][height])
+void SetPlayerShip(char (&field)[width][height], int length)
 {
-
-}
-
-void SetPlayerBattleShip(char (&field)[width][height])
-{
-
-}
-
-void SetPlayerDestroyer(char (&field)[width][height])
-{
-
+    while(true)
+    {
+        int x = rand() % width;
+        int y = rand() % height;
+    
+        if(wayToPlaceShip(x, y, field, length, axisForShips) == 1)
+        {
+            placeShip(field, length, x, y, axisForShips);
+            break;
+        }
+    }
 }
 
 void SetPlayerShips(char (&field)[width][height])
 {
-    SetPlayerCarrier(field);
-    SetPlayerCruiser(field);
-    SetPlayerBattleShip(field);
-    SetPlayerDestroyer(field);
+    SetPlayerShip(field, carrierLength);
+    SetPlayerShip(field, cruiserLength);
+    SetPlayerShip(field, battleShipLength);
+    SetPlayerShip(field, miniShipLength);
 }
 
 void DrawField(char field[width][height], int playerMode)
@@ -146,7 +191,7 @@ void DrawField(char field[width][height], int playerMode)
             }
             else if(playerMode == 2)
             {
-                field[j][i];
+                cout << field[j][i];
             }
         }
         cout << endl;
@@ -173,10 +218,27 @@ void Shoot(int x, int y, char (&field)[width][height], int &shipsLeft)
     {
         field[x][y] = '#';
         shipsLeft--;
+        Shoot(x, y, field, shipsLeft);
     }
     else if (field[x][y] == 'Y')
     {
         field[x][y] = '^';
+    }
+}
+
+void tryToShoot(string playerCreature, int playerShootX, int playerShootY, char (&enemyField)[width][height], int &playerShipsLeft)
+{
+    
+    if(!isPerson(playerCreature))
+    {
+        do
+        {
+            Shoot(playerShootX, playerShootY, enemyField, playerShipsLeft);
+        } while(enemyField[playerShootX][playerShootY] == '#' || enemyField[playerShootX][playerShootY] == '^');
+    }
+    else
+    {
+        Shoot(playerShootX, playerShootY, enemyField, playerShipsLeft);
     }
 }
 
@@ -197,11 +259,13 @@ void DrawGameTurn()
 
 void playerInputAsker()
 {
+    inputPlayerTypes();
+    
     while (true)
     {
-        if (enteredCorrectType(playerOneType) && enteredCorrectType(playerTwoType))
+        if (!enteredCorrectType(playerOneType) && !enteredCorrectType(playerTwoType))
         {
-            system(("clr"));
+            system("clr");
             inputPlayerTypes();
         }
         else
@@ -215,7 +279,7 @@ void Turn(string playerCreature, int &playerShootX, int &playerShootY, char (&en
 {
     DrawGameTurn();
     PlayerInput(playerCreature, playerShootX, playerShootY);
-    Shoot(playerShootX, playerShootY, enemyField, playerShipsLeft);
+    tryToShoot(playerCreature, playerShootX, playerShootY, enemyField, playerShipsLeft);
     cout << "Press enter to continue...";
     cin >> cheatCode;
     system("clr");
@@ -223,6 +287,10 @@ void Turn(string playerCreature, int &playerShootX, int &playerShootY, char (&en
 
 void gameLoop()
 {
+    playerInputAsker();
+    
+    SetPlayers();
+    
     do
     {
         Turn(playerOneType, playerOneShootX, playerOneShootY, playerTwoField, playerTwoShipsLeft);
