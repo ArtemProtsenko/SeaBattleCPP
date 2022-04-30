@@ -51,6 +51,14 @@ bool enteredCorrectType(string playerType)
 
 bool cantPlaceBlock(char field[width][height], int x, int y)
 {
+    if (x < 0)
+    {
+        x++;
+    }
+    if (y < 0)
+    {
+        y++;
+    }
     return field[x][y] != 'Y';
 }
 
